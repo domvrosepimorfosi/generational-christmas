@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generational Christmas</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- General Layout --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fcf6e9;
+            color: #2c3e50;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: #b3000c;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-logo { height: 60px; width: auto; }
+        .header-text { text-align: left; }
+        
+        /* Christmas Font for Titles */
+        h1, h2 { 
+            margin: 0; 
+            font-family: 'Mountains of Christmas', cursive; 
+            letter-spacing: 1px;
+        }
+
+        h1 { font-size: 2.2rem; line-height: 1.1; }
+        h2 { font-size: 1.8rem; color: #b3000c; } 
+
+        .subtitle { 
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 1rem; 
+            margin-top: 5px; 
+            opacity: 0.9; 
+        }
+
+        /* --- Audio Button --- */
+        .audio-btn-container {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        #listen-btn {
+            background-color: white;
+            color: #b3000c;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px; 
+        }
+
+        .page-section {
+            display: none;
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            padding: 30px; 
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .page-section.active {
+            display: flex;
+            align-items: flex-start;
+            gap: 40px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Text Side (Left) --- */
+        .text-block {
+            width: 55%; 
+            font-size: 1.15rem;
+            line-height: 1.6;
+            text-align: justify; 
+        }
+
+        .birth-date {
+            font-size: 1.2rem;
+            color: #555;
+            font-family: 'Segoe UI', sans-serif; 
+            display: block; 
+            margin-top: 5px;
+        }
+
+        /* --- Image Side (Right) --- */
+        .right-column {
+            width: 45%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px; 
+        }
+
+        .image-wrapper {
+            position: relative; 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .gen-img {
+            width: 100%;       
+            height: auto;      
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* The Small Logo in the Corner */
+        .watermark-logo {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 50px; 
+            height: auto;
+            opacity: 0.9;
+            z-index: 10;
+        }
+
+        /* --- Cover Page Fixes (Page 0) --- */
+        #page-0.active { 
+            flex-direction: column; 
+            text-align: center; 
+            align-items: center; 
+            gap: 20px;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        
+        /* CLICKABLE COVER IMAGE STYLE */
+        .main-cover-img { 
+            max-width: 60%; 
+            height: auto; 
+            border: 4px solid #006400; 
+            cursor: pointer; /* Shows hand cursor */
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .main-cover-img:hover {
+            transform: scale(1.02); /* Slight zoom on hover */
+            box-shadow: 0 0 20px rgba(0, 100, 0, 0.4); /* Glow effect */
+        }
+
+        /* Make image look good when full screen */
+        .main-cover-img:fullscreen {
+            object-fit: contain;
+            background-color: black;
+            cursor: zoom-out; /* Hint that clicking exits */
+        }
+
+        /* --- Flashcards Styling (Page 5) --- */
+        #page-5.active {
+            flex-direction: column;
+        }
+
+        .flashcards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .flashcard {
+            background-color: transparent;
+            width: 100%;
+            height: 250px;
+            perspective: 1000px; /* 3D effect */
+            cursor: pointer;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Card Colors */
+        .card-red .flashcard-front, .card-red .flashcard-back { background-color: #b3000c; }
+        .card-green .flashcard-front, .card-green .flashcard-back { background-color: #006400; }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background-color: #333; /* Darker back or same color */
+        }
+        
+        .card-red .flashcard-back { background-color: #8a0009; }
+        .card-green .flashcard-back { background-color: #004d00; }
+
+        .fc-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .tap-hint { font-size: 0.8rem; margin-top: 15px; opacity: 0.7; font-weight: normal; }
+
+        /* --- Navigation Buttons --- */
+        .nav-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn { background-color: #006400; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background-color: #004d00; }
+
+        footer { background-color: #2c3e50; color: white; text-align: center; padding: 15px; }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .page-section.active { flex-direction: column-reverse; }
+            #page-5.active { flex-direction: column; } /* Keep flashcards stacked normally */
+            .text-block, .right-column { width: 100%; }
+            header { flex-direction: column; text-align: center; }
+            .audio-btn-container { position: static; margin-top: 10px; transform: none; }
+            .main-cover-img { max-width: 90%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="logo.png" alt="Logo" class="header-logo">
+        <div class="header-text">
+            <h1>Generational Christmas</h1>
+            <div class="subtitle">One Holiday, Four Generations: From Gen X to Gen Alpha</div>
+        </div>
+        <div class="audio-btn-container">
+            <button id="listen-btn" onclick="toggleAudio()">🎵 Listen</button>
+        </div>
+    </header>
+
+    <audio id="bg-audio" loop>
+        <source src="audio.mp3" type="audio/mpeg">
+    </audio>
+
+    <main>
+        <div id="page-0" class="page-section active">
+            <img src="Generational Christmas.png" alt="Cover" class="main-cover-img" onclick="toggleImageFullScreen(this)" title="Click to Zoom In / Zoom Out">
+            
+            <div class="nav-controls">
+                <button class="btn" onclick="nextPage()">Next &rarr;</button>
+            </div>
+        </div>
+
+        <div id="page-1" class="page-section">
+            <div class="text-block">
+                <h2>1. Generation X: The Busy Bosses<br><span class="birth-date">(Born 1965 – 1980)</span></h2>
+                <p>For Generation X, Christmas is a day of hard work. They are the parents or the hosts, so they are the "bosses" of the holiday. They wake up early, but not to open presents. They have to cook the turkey and turn on the heating.</p>
+                <p>They don't play traditional Christmas carols; they prefer cool rock music from the 1980s. They spend the morning in the kitchen. They are also the peacemakers. They stop arguments between the older family members and the teenagers.</p>
+                <p>They clean up the wrapping paper and pour the drinks. By the evening, Gen X is very tired. They sit down with a glass of wine and look at the messy house. They are exhausted, but they feel happy because they made a nice day for their family.</p>
+            </div>
+            <div class="right-column">
+                <div class="image-wrapper">
+                    <img src="1.png" alt="Generation X" class="gen-img">
+                    <img src="logo.png" class="watermark-logo" alt="logo">
+                </div>
+                <div class="nav-controls">
+                    <button class="btn" onclick="prevPage()">&larr; Back</button>
+                    <button class="btn" onclick="nextPage()">Next &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-2" class="page-section">
+            <div class="text-block">
+                <h2>2. Millennials: The Picture-Perfect Parents<br><span class="birth-date">(Born 1981 – 1996)</span></h2>
+                <p>For Millennials, Christmas must look beautiful. They want the day to feel like a happy movie. Often, the whole family wears matching pyjamas (clothes for sleeping) in colours like red or green.</p>
+                <p>They make a special, healthy breakfast that looks good on a plate. They take many photos with their phones. They want to capture "perfect moments" to post on Instagram or share with friends.</p>
+                <p>They are very gentle with their young children and help them open gifts calmly. They also care about the planet, so they are careful to recycle the paper. They are tired by the end of the day because they tried very hard to make everything magical.</p>
+            </div>
+            <div class="right-column">
+                <div class="image-wrapper">
+                    <img src="2.png" alt="Millennials" class="gen-img">
+                    <img src="logo.png" class="watermark-logo" alt="logo">
+                </div>
+                <div class="nav-controls">
+                    <button class="btn" onclick="prevPage()">&larr; Back</button>
+                    <button class="btn" onclick="nextPage()">Next &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-3" class="page-section">
+            <div class="text-block">
+                <h2>3. Gen Z: The Relaxed Teenagers<br><span class="birth-date">(Born 1997 – 2012)</span></h2>
+                <p>Gen Z likes a relaxed and comfortable Christmas. They usually wake up late, around 10:30 AM. They wear big, baggy sweatshirts that look old-fashioned (vintage). Even if the weather is freezing, they often drink iced coffee.</p>
+                <p>Their gifts are very personal. They might give something they made by hand, or something funny they found in a second-hand shop. They participate in family activities, but they also need breaks.</p>
+                <p>Sometimes they go to their room to text friends or watch videos. They like to make funny videos for TikTok with their family. At dinner, they might ask about the food ingredients because many of them care about animal rights.</p>
+            </div>
+            <div class="right-column">
+                <div class="image-wrapper">
+                    <img src="3.png" alt="Gen Z" class="gen-img">
+                    <img src="logo.png" class="watermark-logo" alt="logo">
+                </div>
+                <div class="nav-controls">
+                    <button class="btn" onclick="prevPage()">&larr; Back</button>
+                    <button class="btn" onclick="nextPage()">Next &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-4" class="page-section">
+            <div class="text-block">
+                <h2>4. Gen Alpha: The Excited Kids<br><span class="birth-date">(Born 2013 – Present)</span></h2>
+                <p>Gen Alpha are the children of today. For them, Christmas is fast and loud. They cannot wait. They wake up at 5:00 AM because they have so much energy. They open their presents very quickly.</p>
+                <p>They don't care about saving the paper; they just want to see the toy. They usually want technology gifts, like tablets, or digital money for video games like Roblox. Some older kids want expensive face creams that they saw on the internet. They love screens.</p>
+                <p>Even while they are in the living room with the family, they are often playing a game on an iPad. They eat dinner quickly so they can go back to playing.</p>
+            </div>
+            <div class="right-column">
+                <div class="image-wrapper">
+                    <img src="4.png" alt="Gen Alpha" class="gen-img">
+                    <img src="logo.png" class="watermark-logo" alt="logo">
+                </div>
+                <div class="nav-controls">
+                    <button class="btn" onclick="prevPage()">&larr; Back</button>
+                    <button class="btn" onclick="nextPage()">Practice &rarr;</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-5" class="page-section">
+            <div style="width: 100%; text-align: center;">
+                <h2>5. Christmas Review Challenge!</h2>
+                <p>Tap a card to flip it and check your knowledge.</p>
+                
+                <div class="flashcards-container">
+                    
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎅</div>
+                                <p>According to the text, what is Christmas like for Generation X?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>It is a day of hard work where they act as the 'bosses' of the holiday.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎄</div>
+                                <p>What is the primary role of Gen X on Christmas day?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They are the parents or the hosts.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎁</div>
+                                <p>Instead of opening presents, what are the first tasks for Gen X on Christmas morning?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They have to cook the turkey and turn on the heating.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">❄️</div>
+                                <p>What kind of music does Generation X prefer to play on Christmas?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They prefer cool rock music from the 1980s.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🦌</div>
+                                <p>Besides hosting, what social role does Gen X play within the family on Christmas?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They are the peacemakers who stop arguments.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🍪</div>
+                                <p>Generation X are the peacemakers, stopping arguments between the older family members and the _____.</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>teenagers</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🔔</div>
+                                <p>List two specific tasks Gen X performs during the day, aside from cooking.</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They clean up the wrapping paper and pour the drinks.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">⛄</div>
+                                <p>How does Generation X feel by the evening of Christmas day?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They are very tired and exhausted.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎅</div>
+                                <p>Despite being exhausted, why does Gen X feel happy at the end of the day?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They feel happy because they made a nice day for their family.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎄</div>
+                                <p>For Millennials, Christmas must look beautiful and feel like a _____.</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>happy movie</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎁</div>
+                                <p>What specific item of clothing might a Millennial family wear to look coordinated on Christmas?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>The whole family often wears matching pyjamas.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">❄️</div>
+                                <p>What kind of breakfast do Millennials typically prepare for Christmas?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They make a special, healthy breakfast that looks good on a plate.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🦌</div>
+                                <p>What is a major activity for Millennials throughout Christmas day?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They take many photos with their phones.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🍪</div>
+                                <p>Why do Millennials take so many photos on Christmas?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They want to capture 'perfect moments' to post on Instagram or share with friends.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🔔</div>
+                                <p>How are Millennials described as interacting with their young children when opening gifts?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They are very gentle and help them open gifts calmly.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">⛄</div>
+                                <p>What action shows that Millennials care about the planet on Christmas?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They are careful to recycle the paper from gifts.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎅</div>
+                                <p>Why do Millennials feel tired by the end of Christmas day?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They are tired because they tried very hard to make everything magical.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎄</div>
+                                <p>How is a typical Christmas described for Gen Z?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>It is relaxed and comfortable.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎁</div>
+                                <p>At what time does Gen Z usually wake up on Christmas morning?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They usually wake up late, around 10:30 AM.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">❄️</div>
+                                <p>What style of clothing does Gen Z typically wear on Christmas day?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They wear big, baggy sweatshirts that look old-fashioned (vintage).</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🦌</div>
+                                <p>What drink might a member of Gen Z have on Christmas, even in freezing weather?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They often drink iced coffee.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🍪</div>
+                                <p>How are the gifts given by Gen Z described?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>Their gifts are very personal, handmade, or funny second-hand items.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🔔</div>
+                                <p>While Gen Z participates in family activities, what do they also need?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They also need breaks.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">⛄</div>
+                                <p>What might Gen Z do when they take a break from family activities?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They might go to their room to text friends or watch videos.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎅</div>
+                                <p>What kind of social media content does Gen Z like to create with their family?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They like to make funny videos for TikTok.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎄</div>
+                                <p>What question might a member of Gen Z ask at Christmas dinner?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They might ask about the food ingredients.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎁</div>
+                                <p>What value might prompt a member of Gen Z to ask about food ingredients?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>Many of them care about animal rights.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">❄️</div>
+                                <p>For Gen Alpha, Christmas is described as being _____ and _____.</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>fast and loud</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🦌</div>
+                                <p>What time do Gen Alpha children often wake up on Christmas morning?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They wake up at 5:00 AM.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🍪</div>
+                                <p>Why do Gen Alpha children wake up so early on Christmas?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They wake up early because they have so much energy.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🔔</div>
+                                <p>How does Gen Alpha open their presents?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They open their presents very quickly and don't care about saving the paper.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">⛄</div>
+                                <p>What kind of technology gifts does Gen Alpha usually want?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They usually want gifts like tablets or digital money for video games.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎅</div>
+                                <p>The text mentions Gen Alpha may want digital money for which specific video game?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>Roblox.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎄</div>
+                                <p>What non-technology gift, seen on the internet, might older Gen Alpha children want?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They might want expensive face creams.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-red" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">🎁</div>
+                                <p>What object do children in Gen Alpha love and often use even when with family?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They love screens and are often playing a game on an iPad.</p></div>
+                        </div>
+                    </div>
+
+                    <div class="flashcard card-green" onclick="this.classList.toggle('flipped')">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="fc-icon">❄️</div>
+                                <p>How does Gen Alpha behave at Christmas dinner?</p>
+                                <div class="tap-hint">Tap to flip</div>
+                            </div>
+                            <div class="flashcard-back"><p>They eat dinner quickly so they can go back to playing.</p></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="nav-controls" style="margin-top: 30px;">
+                    <button class="btn" onclick="prevPage()">&larr; Back</button>
+                    </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        🎄✍ Created by Panagiotis Domvros, English and Drama Teacher, All Rights Reserved ✍🎅
+    </footer>
+
+    <script>
+        let currentPage = 0;
+        const totalPages = 6; 
+
+        function showPage(index) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(`page-${index}`);
+            if (target) target.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages - 1) { currentPage++; showPage(currentPage); }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) { currentPage--; showPage(currentPage); }
+        }
+
+        function toggleAudio() {
+            const audio = document.getElementById('bg-audio');
+            const btn = document.getElementById('listen-btn');
+            if (audio.paused) { audio.play(); btn.innerHTML = "⏸ Pause"; }
+            else { audio.pause(); btn.innerHTML = "🎵 Listen"; }
+        }
+
+        // FULL SCREEN IMAGE TOGGLE LOGIC
+        function toggleImageFullScreen(element) {
+            if (!document.fullscreenElement) {
+                // Enter Full Screen
+                if (element.requestFullscreen) {
+                    element.requestFullscreen();
+                } else if (element.webkitRequestFullscreen) { /* Safari */
+                    element.webkitRequestFullscreen();
+                } else if (element.msRequestFullscreen) { /* IE11 */
+                    element.msRequestFullscreen();
+                }
+            } else {
+                // Exit Full Screen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
